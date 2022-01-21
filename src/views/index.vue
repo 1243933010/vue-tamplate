@@ -1,78 +1,93 @@
 <template>
-    <div>
-        <span>INDEX</span>
-        <!-- <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" /> -->
-        <div @click="indexClick">父组件上面的点击按钮</div>
-        <div @click="goUrl">
-            <span>用函数的方法跳转到page2页面</span>
+    <el-container
+    class="layout-container-demo"
+    style="height: 500px; border: 1px solid #eee"
+  >
+    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+     <suspense>
+       <menuCom />
+     </suspense>
+    </el-aside>
+
+    <el-container>
+      <el-header style="text-align: right; font-size: 12px">
+        <div class="toolbar">
+          <el-dropdown>
+            <el-icon style="margin-right: 8px; margin-top: 1px"
+              ><setting
+            /></el-icon>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>View</el-dropdown-item>
+                <el-dropdown-item>Add</el-dropdown-item>
+                <el-dropdown-item>Delete</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <span>Tom</span>
         </div>
-         <el-button type="default" @click="click0">点击改变下方数据</el-button>
-        <div><p>{{indexTitle}}</p></div>
-        <el-button type="info" @click="click1">点击改变非响应式title(会失败)</el-button>
-        <el-button type="success" @click="click2">点击改变响应式title(会成功)</el-button>
-        <div style="background:rgb(233, 152, 152) ;">
-            <IndexComponent msg="propsMsg" ref="IndexComponent1" @emitFnc1="emitFnc1"/>
-        </div>
-        
-    </div>
+      </el-header>
+
+      <el-main>
+        <el-scrollbar>
+          <el-table :data="tableData">
+            <el-table-column prop="date" label="Date" width="140">
+            </el-table-column>
+            <el-table-column prop="name" label="Name" width="120">
+            </el-table-column>
+            <el-table-column prop="address" label="Address"> </el-table-column>
+          </el-table>
+        </el-scrollbar>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 
 <script setup lang="ts">
-import { ref } from '@vue/reactivity'
-import { onMounted, provide,readonly, watchEffect } from 'vue-demi';
-import { useRoute, useRouter } from 'vue-router';
-  const router = useRouter()
-  const route = useRoute();
-  
+import {  ref } from 'vue'
+import { Message, Menu as IconMenu, Setting } from '@element-plus/icons-vue'
+import useCurrentInstance from "@/utils/useCurrentInstance";
+import  menuCom from '@/components/menu/index.vue'
 
-  import HelloWorld from '../components/HelloWorld.vue'
-  import IndexComponent from '../components/IndexComponent.vue'
-
-let indexMsg2:String = ref('来之index组件的provide ref信息')
-  let indexMsg = 'index组件的provide信息'
-  const IndexComponent1 = ref(null);
-  const indexTitle = ref('index组件的测试数据')
-  onMounted(()=>{
-      console.log('mounted事件触发')
-  })
-  
-  provide('indexMsg',readonly(indexMsg))  //添加readonly 子组件就没法改变父组件传过去的内容
-  provide('indexMsg2',readonly(indexMsg2))
-
-  
-
-   
-  watchEffect(()=>{
-      console.log('watchEffect2:'+ indexTitle.value)
-  },{flush: 'post'})
-
-   watchEffect(()=>{
-      console.log('watchEffect1:'+ indexTitle.value)   //1比2早
-  })
-
-  let click0 = ()=>{
-      indexTitle.value = 'index组件的测试数据被改变了'+new Date()
-  }
-  let click1 = ()=>{
-    indexMsg = '66666'
+const item = {
+  date: '2016-05-02',
+  name: 'Tom',
+  address: 'No. 189, Grove St, Los Angeles',
 }
-let click2 = ()=>{
-    indexMsg2.value = '66666'
-}
-  let indexClick = ()=>{
-      console.log(IndexComponent1.value)
-      IndexComponent1?.value?.childClick();
-  }
-  let emitFnc1 = (info:String)=>{
-      console.log(info)
-  }
-  let goUrl=()=>{
-      router.push({
-          path:'/helloWorld',
-          query:{
-              
-          }
-      })
-  }
+const tableData = ref(Array(20).fill(item))
+const {proxy} = useCurrentInstance();
+  // proxy.$request('menuList')
 </script>
+
+
+<style lang="scss">
+    .layout-container-demo {
+  .el-header {
+    position: relative;
+    background-color: #b3c0d1;
+    color: var(--el-text-color-primary);
+  }
+  .el-aside {
+    width: 240px;
+    color: var(--el-text-color-primary);
+    background: #fff !important;
+    border-right: solid 1px #e6e6e6;
+    box-sizing: border-box;
+  }
+  .el-menu {
+    border-right: none;
+  }
+  .el-main {
+    padding: 0;
+  }
+  .toolbar {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+  }
+}
+</style>
